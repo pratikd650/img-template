@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Student Certficates</title>
+    <!-- load MUI -->
+    <link href="https://cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+    <!-- load jsZip-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js" 
+      integrity="sha512-xQBQYt9UcgblF6aCMrwU1NkVA7HCXaSN2oq0so80KO+y68M+n64FOcqgav4igHe6D5ObBLIf68DWv+gfBowczg=="
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" 
+      integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+    </script>
+
+  </head>
+  <body>
+    <!-- example content -->
+    <div class="mui-container-fluid">
+      <div class="mui-panel">
+        <h1>Student Certificates</h1>
+        Use this web page to generate student certificates. You need to upload a template image, and a list of students.
+        The student details will be put on template, and a jpeg generated from it. Then all jpegs can be downloaded as a zip file.
+        All of these generation will happen locally in your browser, and nothing will be sent to the server.
+
+        <h2>Step 1: Choose image</h2>
+        <input id="uploadImage" type="file" name="photo">
+        
+        <h2>Step 2: Set field values</h2>
+        <form class="mui-form">
+          <div class="mui-textfield">
+            <input type="text" id="classValues"></item>
+            <label>Class</label>
+          </div>
+          <div class="mui-textfield">
+            <input type="text" id="sectionValues"></item>
+            <label>Section</label>
+          </div>
+          <div class="mui-textfield">
+            <input type="text" id="positionValues"></item>
+            <label>Position</label>
+          </div>
+          <div class="mui-textfield">
+            <input type="text" id="houseValues"></item>
+            <label>House</label>
+          </div>
+          <div class="mui-textfield">
+            <input type="text" id="houseColors"></item>
+            <label>House colors</label>
+          </div>
+        </form>
+        
+        <h2>Step 3: Add text boxes</h2>
+        <p>Click and drag in the below image to create text boxes. These will be filled in with student data</p>
+        <canvas id="canvas" width="100" height="100" style="border:1px solid #ccc"></canvas>
+        
+        <h2>Step 4: Adjust text boxes (Optional)</h2>
+        <form class="mui-form">
+          <div class="mui-textfield">
+            <input type="text" id="font"></input>
+            <label>Font</label>
+          </div>
+          <div class="mui-textfield">
+            <textarea id="config" rows="5"></textarea>
+            <label>X1, Y1, X2, Name</label>
+          </div>
+          <button class="mui-btn mui-btn--primary mui-btn--raised" id="updateConfig">Update Config</button>
+        </form>
+        <h2>Step 5: Enter Student data</h2>
+        <form class="mui-form"> 
+          <div class="mui-textfield">
+            <textarea id="data" rows="10"></textarea>
+            <label>Enter student data, one line per student. First line should be column headers</label>
+          </div>
+          <button class="mui-btn mui-btn--primary mui-btn--raised" id="checkFormat">Check format</button>
+        </form>
+        <h2>Step 6: Download zip file</h2>
+        <form class="mui-form">
+          <div class="mui-textfield">
+            <input type="text" id="fileName"></input>
+            <label>Enter File name pattern</label>
+          </div> 
+        </form>
+        <button class="mui-btn mui-btn--primary mui-btn--raised" id="generateZip">Generate Zip</button>
+        <span id="statusMessage"></span>
+      </div>
+    </div>
+    <div id="itemDialog" class="mui-container-fluid" style="display:none; width:300px; height:150px; margin:100px auto;">
+      <div class="mui-panel">
+        <div class="mui-select">
+          <select></select>
+          <label>Name:</label>
+        </div>
+        <div>
+          <button class="mui-btn mui-btn--primary mui-btn--raised" onclick="saveItemDetail()">Ok</button>
+          <button class="mui-btn mui-btn--raised" onclick="cancelItemDetail()">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div id="alertDialog" class="mui-container-fluid" style="display:none; width:300px; height:200px; margin:100px auto;">
+      <div class="mui-panel" style="white-space: pre-line; overflow-y: scroll;">
+      </div>
+      <div>
+        <button class="mui-btn mui-btn--primary mui-btn--raised" onclick="closeAlert()">Ok</button>
+      </div>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>
