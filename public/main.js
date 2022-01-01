@@ -23,7 +23,7 @@ const fileNameTxt = document.getElementById('fileName');
 const generateZipBtn = document.getElementById('generateZip');
 const statusMsgSpan = document.getElementById('statusMessage');
 const fields = {
-    'SlNo': { regex: "\d+"},
+    'Slno': { regex: "\d+"},
     'Name': {regex: "\\w+(?: \w+)*", transform: titleCase},
     'Section': { values:['A','B','C','D','E','F', 'G', 'H']},
     'House':{ values:["Aakash", "Agni", "Prithvi", "Trishul"], transform: titleCase,
@@ -51,10 +51,10 @@ function ordinalNumber(num) {
 }
 
 
-let itemFont = "25px serif";
+let itemFont = "25px sans-serif";
 let configItems = [];
 
-let fileName = 'Class_Section_Position';
+let fileName = 'Class_Section_Position.jpg';
 
 fileReader.onload = function (e) {
     console.log(typeof e.target.result, e.target.result instanceof Blob);
@@ -80,8 +80,10 @@ function drawImage() {
     context.fillStyle = fillStyle;
     context.font = itemFont;
     for(const item of configItems) {
+        context.textAlign = item.align;
         context.fillRect(item.x, item.y, item.x2 - item.x, thick);
-        context.fillText(item.name, item.x, item.y)
+        const x = item.align === "left" ? item.x : (item.align === 'right' ? item.x2 : (item.x + item.x2)/2);
+        context.fillText(item.name, x, item.y)
     }
 }
 
@@ -108,7 +110,7 @@ for(const field in valuesTxt) {
 function updateConfig() {
     let configStr = "";
     for(const item of configItems) {
-        configStr = configStr + item.x + ", " + item.y + ", " + item.x2 + ", " + item.name + "\n";
+        configStr = configStr + item.name + ", " + item.x + ", " + item.y + ", " + item.x2 + ", " + item.align + "\n";
     }
     configTxtArea.value = configStr;
     ls.setItem('config', configStr);
@@ -117,7 +119,7 @@ function updateConfig() {
 function parseConfig() {
     configItems = [];
     const items = configTxtArea.value.split("\n");
-    const regex = /^\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\w+)\s*$/;
+    const regex = /^\s*(\w+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\w+)\s*$/;
     for(const itemStr of items) {
         if (!itemStr.trim()) {
             continue;
@@ -126,8 +128,8 @@ function parseConfig() {
         if (!match) {
             console.error("Invalid pattern ", itemStr);
         } else {
-            let [,x,y,x2,name] = match;
-            configItems.push({x,y,x2, name});
+            let [,name,x,y,x2,align] = match;
+            configItems.push({name, x:+x,  y:+y, x2:+x2, align}); // use unary + to convert to numbers
         }
     }
 }
@@ -310,6 +312,8 @@ function enterItemDetails() {
         selectElem.appendChild(option);
     });
     selectElem.id = 'itemName';
+    const selectElem2 = modalEl.getElementsByTagName('select')[1];
+    selectElem2.id = 'itemAlign';
     mui.overlay('on', modalEl);
     selectElem.focus()
 }
@@ -322,7 +326,13 @@ function cancelItemDetail() {
 
 // When user clicks on OK in item dialog
 function saveItemDetail() {
-    configItems.push({x:offsetX, y:offsetY, x2:offsetX2, name:document.getElementById('itemName').value});
+    configItems.push({
+        name:document.getElementById('itemName').value,
+        x:offsetX,
+        y:offsetY,
+        x2:offsetX2,
+        align:document.getElementById('itemAlign').value,
+    });
     console.log(configItems);
     mui.overlay('off');
     drawImage();
@@ -334,7 +344,7 @@ function showAlert(err) {
     modalEl = document.getElementById('alertDialog').cloneNode(true);
     modalEl.id = 'alertDialog1';
     modalEl.style.display = 'block';
-    modalEl.firstElementChild.append(document.createTextNode(err));
+    modalEl.firstElementChild.firstElementChild.append(document.createTextNode(err));
     mui.overlay('on', modalEl);
 
 }
@@ -346,6 +356,10 @@ function closeAlert() {
 // When user click on GENERATE-ZIP button
 async function generateZip() {
     const records = parseData();
+    if (typeof records === "string") {
+        showAlert(records);
+        return;
+    }
     const zip = new JSZip();
     console.log(records);
     let i = 0;
@@ -364,17 +378,21 @@ async function generateZip() {
                 console.log("House", record, item, index, fields.House);
                 context.fillStyle = fields.House.colors[index];
             }
-            context.fillText(value, item.x, item.y)
+            const x = item.align === "left" ? item.x : (item.align === 'right' ? item.x2 : (item.x  + item.x2)/2);
+            context.textAlign = item.align;
+            context.fillText(value, x, item.y)
         }
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg"));
         const fileNameExpanded = fileName.replace(/[A-Za-z]+/g, txt => record[txt] ? record[txt] : txt);
         statusMsgSpan.innerText = " " + i + " : " + record.Name;
-        zip.file(fileNameExpanded + ".jpg", blob);
+        zip.file(fileNameExpanded, blob);
         i++;
     }
     statusMsgSpan.innerText = "zipping...";
-    const content = await zip.generateAsync({type:"blob"})
+    const content = await zip.generateAsync({type:"blob"},
+        (metadata) => statusMsgSpan.innerText = "zipping " + metadata.currentFile)
     // see FileSaver.js
+    statusMsgSpan.innerText = "saving...";
     saveAs(content, "certificates.zip");
     
     // restore image

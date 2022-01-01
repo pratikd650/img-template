@@ -67,7 +67,7 @@
           </div>
           <div class="mui-textfield">
             <textarea id="config" rows="5"></textarea>
-            <label>X1, Y1, X2, Name</label>
+            <label>Name, X1, Y1, X2, Align</label>
           </div>
           <button class="mui-btn mui-btn--primary mui-btn--raised" id="updateConfig">Update Config</button>
         </form>
@@ -90,11 +90,19 @@
         <span id="statusMessage"></span>
       </div>
     </div>
-    <div id="itemDialog" class="mui-container-fluid" style="display:none; width:300px; height:150px; margin:100px auto;">
+    <div id="itemDialog" class="mui-container-fluid" style="display:none; width:300px; height:200px; margin:100px auto;">
       <div class="mui-panel">
         <div class="mui-select">
-          <select></select>
+          <select name="name"></select>
           <label>Name:</label>
+        </div>
+        <div class="mui-select">
+          <select name="align">
+            <option>left</option>
+            <option>center</option>
+            <option>right</option>
+          </select>
+          <label>Align:</label>
         </div>
         <div>
           <button class="mui-btn mui-btn--primary mui-btn--raised" onclick="saveItemDetail()">Ok</button>
@@ -104,8 +112,7 @@
     </div>
     <div id="alertDialog" class="mui-container-fluid" style="display:none; width:300px; height:200px; margin:100px auto;">
       <div class="mui-panel" style="white-space: pre-line; overflow-y: scroll;">
-      </div>
-      <div>
+        <div></div>
         <button class="mui-btn mui-btn--primary mui-btn--raised" onclick="closeAlert()">Ok</button>
       </div>
     </div>
